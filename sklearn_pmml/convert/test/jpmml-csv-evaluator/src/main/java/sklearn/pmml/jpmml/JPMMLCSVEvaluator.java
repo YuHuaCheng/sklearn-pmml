@@ -95,7 +95,7 @@ public class JPMMLCSVEvaluator
         }
     }
 
-    static void writePredictions(Evaluator evaluator, List<Map<FieldName, ?>> predictions, String outputFile) throws IOException
+    static void writePredictions(List<Map<FieldName, ?>> predictions, String outputFile) throws IOException
     {
         final int outputFieldCount = predictions.get(0).keySet().size();
         final Set<FieldName> outputFields = Sets.newHashSetWithExpectedSize(outputFieldCount);
@@ -103,8 +103,10 @@ public class JPMMLCSVEvaluator
         int index = 0;
         for (FieldName fieldName : predictions.get(0).keySet())
         {
-            outputFields.add(fieldName);
-            header[index++] = fieldName.toString();
+            if (fieldName.toString().contains("output::")){
+                outputFields.add(fieldName);
+                header[index++] = fieldName.toString();
+            }
         }
 
         try (final CsvMapWriter csvMapWriter = new CsvMapWriter(new FileWriter(outputFile), CsvPreference.STANDARD_PREFERENCE))
@@ -136,7 +138,7 @@ public class JPMMLCSVEvaluator
             Evaluator evaluator = evaluatorFromXml(new FileInputStream(pmmlFile));
 //            evaluator.verify();
             final List<Map<FieldName, ?>> predictions = getPredictions(evaluator, csvFeaturesFile);
-            writePredictions(evaluator, predictions, outputFile);
+            writePredictions(predictions, outputFile);
             logger.info(String.format("Wrote %d predictions from %s to %s", predictions.size(), csvFeaturesFile, outputFile));
         }
         catch (IOException ex)

@@ -270,9 +270,10 @@ class EstimatorConverter(object):
         key = self.context.schemas[Schema.OUTPUT][0]
         model_input = verification_model_input[list(map(Schema.MODEL.extract_feature_name, self.context.schemas[Schema.MODEL]))].values
         model_results = np.vectorize(key.from_number)(self.estimator.predict(X=model_input))
+        verification_data_output_result = np.vectorize(key.from_number)(verification_data[key.full_name].values)
         if key.full_name in verification_data:
             # make sure that if results are provided, the expected and actual values are equal
-            assert_equal(key, model_results, verification_data[key.full_name].values)
+            assert_equal(key, model_results, verification_data_output_result)
         verification_input[Schema.OUTPUT.extract_feature_name(key)] = model_results
 
         if isinstance(key, CategoricalFeature):
